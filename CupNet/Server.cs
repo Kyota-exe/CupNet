@@ -9,7 +9,7 @@ namespace CupNet
     {
         public static int MaxPlayers { get; private set; }
         public static int Port { get; private set; }
-        // clients could just be a list.
+        // clients could just be a list?
         public static Dictionary<int, Client> clients = new Dictionary<int, Client>();
         private static TcpListener tcpListener;
 
@@ -17,9 +17,11 @@ namespace CupNet
         {
             MaxPlayers = _maxPlayers;
             Port = _port;
+            InitializeServerData();
 
             Console.WriteLine("Starting server...");
-            
+
+            //IPAddress localAddr = IPAddress.Parse("127.0.0.1");
             tcpListener = new TcpListener(IPAddress.Any, Port);
             tcpListener.Start();
 
@@ -30,7 +32,7 @@ namespace CupNet
         }
 
         private static void OnTcpClientConnect(IAsyncResult asyncResult)
-        {
+        { 
             TcpClient client = tcpListener.EndAcceptTcpClient(asyncResult);
             tcpListener.BeginAcceptTcpClient(OnTcpClientConnect, null);
             

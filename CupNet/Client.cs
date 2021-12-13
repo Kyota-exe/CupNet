@@ -5,6 +5,7 @@ namespace CupNet
 {
     public class Client
     {
+        // Should dataBufferSize be a const? Could be put in App.config?
         public static int dataBufferSize = 4096;
         public int id;
         public TCP tcp;
@@ -29,7 +30,7 @@ namespace CupNet
             }
             
             public void Connect(TcpClient _socket)
-            {
+            { 
                 socket = _socket;
                 socket.ReceiveBufferSize = dataBufferSize;
                 socket.SendBufferSize = dataBufferSize;
