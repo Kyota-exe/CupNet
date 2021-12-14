@@ -11,15 +11,22 @@ namespace CupNet
 
             GetServerConfigSettings(out int maxPlayers, out int port, out int dataBufferSize);
             Server.Start(maxPlayers, port, dataBufferSize);
-            
+
             Console.ReadKey();
         }
 
         private static void GetServerConfigSettings(out int maxPlayers, out int port, out int dataBufferSize)
         {
-            maxPlayers = ConfigManager.GetValue<int>("maxPlayers");
+            /*
+            maxPlayers = ConfigurationManager.AppSettings.Get("maxPlayers");
             port = ConfigManager.GetValue<int>("port");
             dataBufferSize = ConfigManager.GetValue<int>("dataBufferSize");
+            */
+
+            // Use values here instead of App.config for now.
+            maxPlayers = 4;
+            port = 9812;
+            dataBufferSize = 4096;
         }
     }
 }

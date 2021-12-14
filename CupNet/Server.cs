@@ -11,7 +11,7 @@ namespace CupNet
         public static int Port { get; private set; }
         public static int DataBufferSize { get; private set; }
         // clients could just be a list?
-        public static Dictionary<int, Client> clients = new Dictionary<int, Client>();
+        public static Dictionary<int, ClientManager> clients = new Dictionary<int, ClientManager>();
         private static TcpListener tcpListener;
 
         public static void Start(int _maxPlayers, int _port, int _dataBufferSize)
@@ -19,7 +19,13 @@ namespace CupNet
             MaxPlayers = _maxPlayers;
             Port = _port;
             DataBufferSize = _dataBufferSize;
-            InitializeServerData();
+            // Why must we initialize all of the client objects at the start,
+            // instead of adding them as the clients themselves are connecting?
+            // Populate clients dictionary
+            for (int i = 0; i < MaxPlayers; i++)
+            {
+                clients.Add(i, new ClientManager(i));
+            }
 
             Console.WriteLine("Starting server...");
             
@@ -34,32 +40,28 @@ namespace CupNet
 
         private static void OnTcpClientConnect(IAsyncResult asyncResult)
         { 
-            TcpClient client = tcpListener.EndAcceptTcpClient(asyncResult);
+            TcpClient clientSocket = tcpListener.EndAcceptTcpClient(asyncResult);
+            
+            // Call BeginAcceptTcpClient to keep accepting clients (if this wasn't here, I'd only accept the first)
             tcpListener.BeginAcceptTcpClient(OnTcpClientConnect, null);
             
-            Console.WriteLine($"Incoming connection from {client.Client.RemoteEndPoint}...");
+            Console.WriteLine($"Incoming connection from {clientSocket.Client.RemoteEndPoint}...");
 
             // Go through clients dict and find empty slot to place client in
             for (int i = 0; i < MaxPlayers; i++)
             {
-                if (clients[i].tcp.socket == null)
+                if (clients[i].clientSocket == null)
                 {
-                    clients[i].tcp.Connect(client);
+                    // Prepare client sockets receive/send buffers
+                    clientSocket.ReceiveBufferSize = DataBufferSize;
+                    clientSocket.SendBufferSize = DataBufferSize;
+                    
+                    clients[i].Connect(clientSocket);
                     return;
                 }
             }
             
-            Console.WriteLine($"{client.Client.RemoteEndPoint} failed to connect: Server full!");
-        }
-
-        private static void InitializeServerData()
-        {
-            // Why must we initialize all of the client objects at the start,
-            // instead of adding them as the clients themselves are connecting?
-            for (int i = 0; i < MaxPlayers; i++)
-            {
-                clients.Add(i, new Client(i));
-            }
+            Console.WriteLine($"{clientSocket.Client.RemoteEndPoint} failed to connect: Server full!");
         }
     }
 }
