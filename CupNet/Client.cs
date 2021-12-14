@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Net.Sockets;
+using System.Configuration;
 
 namespace CupNet
 {
     public class Client
     {
-        // Should dataBufferSize be a const? Could be put in App.config?
-        public static int dataBufferSize = 4096;
         public int id;
         public TCP tcp;
 
@@ -32,14 +31,28 @@ namespace CupNet
             public void Connect(TcpClient _socket)
             { 
                 socket = _socket;
-                socket.ReceiveBufferSize = dataBufferSize;
-                socket.SendBufferSize = dataBufferSize;
+                socket.ReceiveBufferSize = Server.DataBufferSize;
+                socket.SendBufferSize = Server.DataBufferSize;
 
                 stream = socket.GetStream();
-                receiveBuffer = new byte[dataBufferSize];
+                receiveBuffer = new byte[Server.DataBufferSize];
 
                 // If data is added to the stream, read data into receiveBuffer and call ReceiveCallback
-                stream.BeginRead(receiveBuffer, 0, dataBufferSize, OnStreamDataReceived, null);
+                stream.BeginRead(receiveBuffer, 0, Server.DataBufferSize, OnStreamDataReceived, null);
+                
+                ServerSend.Welcome(id, "Welcome to the server.");
+            }
+            
+            public void SendData(Packet packet)
+            {
+                try
+                {
+                    stream.BeginWrite(packet.ToArray(), 0, packet.Length(), null, null);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error sending packet to client {id} via TCP: {e.Message}");
+                }
             }
 
             private void OnStreamDataReceived(IAsyncResult asyncResult)
@@ -58,7 +71,7 @@ namespace CupNet
                     Array.Copy(receiveBuffer, data, byteLength);
                     // Handle data
 
-                    stream.BeginRead(receiveBuffer, 0, dataBufferSize, OnStreamDataReceived, null);
+                    stream.BeginRead(receiveBuffer, 0, Server.DataBufferSize, OnStreamDataReceived, null);
                 }
                 catch (Exception e)
                 {

@@ -9,19 +9,20 @@ namespace CupNet
     {
         public static int MaxPlayers { get; private set; }
         public static int Port { get; private set; }
+        public static int DataBufferSize { get; private set; }
         // clients could just be a list?
         public static Dictionary<int, Client> clients = new Dictionary<int, Client>();
         private static TcpListener tcpListener;
 
-        public static void Start(int _maxPlayers, int _port)
+        public static void Start(int _maxPlayers, int _port, int _dataBufferSize)
         {
             MaxPlayers = _maxPlayers;
             Port = _port;
+            DataBufferSize = _dataBufferSize;
             InitializeServerData();
 
             Console.WriteLine("Starting server...");
-
-            //IPAddress localAddr = IPAddress.Parse("127.0.0.1");
+            
             tcpListener = new TcpListener(IPAddress.Any, Port);
             tcpListener.Start();
 

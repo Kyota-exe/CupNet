@@ -9,23 +9,17 @@ namespace CupNet
         {
             Console.Title = "CupNet Server";
 
-            GetServerConfigSettings(out int maxPlayers, out int port);
-            Server.Start(maxPlayers, port);
+            GetServerConfigSettings(out int maxPlayers, out int port, out int dataBufferSize);
+            Server.Start(maxPlayers, port, dataBufferSize);
             
             Console.ReadKey();
         }
 
-        private static void GetServerConfigSettings(out int maxPlayers, out int port)
+        private static void GetServerConfigSettings(out int maxPlayers, out int port, out int dataBufferSize)
         {
-            if (!Int32.TryParse(ConfigurationManager.AppSettings.Get("maxPlayers"), out maxPlayers) || maxPlayers < 0)
-            {
-                throw new Exception("Could not find \"maxPlayers\" in App.config that is a positive integer.");
-            }
-
-            if (!Int32.TryParse(ConfigurationManager.AppSettings.Get("port"), out port) || port < 0)
-            {
-                throw new Exception("Could not find \"port\" in App.config that is a positive integer.");
-            }
+            maxPlayers = ConfigManager.GetValue<int>("maxPlayers");
+            port = ConfigManager.GetValue<int>("port");
+            dataBufferSize = ConfigManager.GetValue<int>("dataBufferSize");
         }
     }
 }
