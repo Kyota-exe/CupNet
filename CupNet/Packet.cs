@@ -15,6 +15,8 @@ namespace CupNet
         }
         
         #region Write method overloads
+        public void Write(byte value) => buffer.Add(value);
+        public void Write(byte[] value) => buffer.AddRange(value);
         public void Write(short value) => buffer.AddRange(BitConverter.GetBytes(value));
         public void Write(int value) => buffer.AddRange(BitConverter.GetBytes(value));
         public void Write(long value) => buffer.AddRange(BitConverter.GetBytes(value));
@@ -34,5 +36,6 @@ namespace CupNet
 
         public byte[] ToArray() => buffer.ToArray();
         public int Length() => buffer.Count;
+        public int UnreadLength() => Length() - readPos;
     }
 }
